@@ -13,6 +13,34 @@ export interface Enemy {
   image: string;
 }
 
+interface Location {
+  id: string;
+  enemies: string[];
+}
+
+const locations: Location[] = [
+  {
+    id: 'village',
+    enemies: ['スライム', 'ゴブリン'],
+  },
+  {
+    id: 'forest',
+    enemies: ['スライム', 'ゴブリン', '森の狼'],
+  },
+  {
+    id: 'mountain',
+    enemies: ['山賊', '石のゴーレム', '氷の精霊'],
+  },
+  {
+    id: 'desert',
+    enemies: ['サンドワーム', '砂漠の盗賊', 'ミイラ'],
+  },
+  {
+    id: 'castle',
+    enemies: ['魔王', '闇の騎士', 'ドラゴン'],
+  },
+];
+
 const enemies: Enemy[] = [
   {
     id: 'slime',
@@ -61,10 +89,20 @@ export function useBattleSystem() {
   }, [gameState.inBattle]);
 
   const startBattle = () => {
-    const randomEnemy = enemies[Math.floor(Math.random() * enemies.length)];
-    const enemy = { ...randomEnemy };
-    setCurrentEnemy(enemy);
-    setBattleLog([`${enemy.name}が現れた！`]);
+    let enemy;
+    if (gameState.currentLocation === 'story') {
+      // 物語からの戦闘の場合は、ランダムな敵を選択
+      enemy = enemies[Math.floor(Math.random() * enemies.length)];
+    } else {
+      // マップからの戦闘の場合は、現在の場所に応じた敵を選択
+      const locationEnemies = locations.find(loc => loc.id === gameState.currentLocation)?.enemies || [];
+      const availableEnemies = enemies.filter(e => locationEnemies.includes(e.name));
+      enemy = availableEnemies[Math.floor(Math.random() * availableEnemies.length)] || enemies[0];
+    }
+    
+    const newEnemy = { ...enemy };
+    setCurrentEnemy(newEnemy);
+    setBattleLog([`${newEnemy.name}が現れた！`]);
   };
 
   const performAttack = () => {

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'rea
 import { LinearGradient } from 'expo-linear-gradient';
 import { MapPin, Lock, CircleCheck as CheckCircle, Star, Sword, Crown } from 'lucide-react-native';
 import { useGameState } from '@/hooks/useGameState';
+import { router } from 'expo-router';
 
 export default function MapScreen() {
   const { gameState, updateGameState } = useGameState();
@@ -26,7 +27,7 @@ export default function MapScreen() {
       name: '深い森',
       description: '古い樹木が立ち並ぶ神秘的な森。スライムやゴブリンが出現する。',
       image: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=300',
-      level: 2,
+      level: 1,
       unlocked: true,
       completed: false,
       type: 'dungeon',
@@ -91,6 +92,7 @@ export default function MapScreen() {
   const handleExplore = (location: any) => {
     if (location.type === 'dungeon' || location.type === 'boss') {
       updateGameState({ inBattle: true, currentLocation: location.id });
+      router.push('/battle');
     }
   };
 

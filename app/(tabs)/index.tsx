@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'rea
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronRight, Play } from 'lucide-react-native';
 import { useGameState } from '@/hooks/useGameState';
+import { router } from 'expo-router';
 
 export default function StoryScreen() {
   const { gameState, updateGameState } = useGameState();
@@ -41,7 +42,15 @@ export default function StoryScreen() {
   const scene = storyScenes[currentScene] || storyScenes[0];
 
   const handleStartBattle = () => {
-    updateGameState({ inBattle: true });
+    if (gameState.inBattle) {
+      return; // 既に戦闘中の場合は何もしない
+    }
+    updateGameState({ 
+      inBattle: true,
+      currentLocation: 'story' // 物語からの戦闘であることを示す
+    });
+    // 戦闘タブに切り替え
+    router.push('/battle');
   };
 
   return (

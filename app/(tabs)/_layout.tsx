@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Sword, User, Package, Map, BookOpen } from 'lucide-react-native';
+import { Sword, User, Package, Map } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -15,11 +15,11 @@ export default function TabLayout() {
         tabBarInactiveTintColor: '#9e9e9e',
       }}>
       <Tabs.Screen
-        name="index"
+        name="map"
         options={{
-          title: '物語',
+          title: 'マップ',
           tabBarIcon: ({ size, color }) => (
-            <BookOpen size={size} color={color} />
+            <Map size={size} color={color} />
           ),
         }}
       />
@@ -47,15 +47,6 @@ export default function TabLayout() {
           title: 'アイテム',
           tabBarIcon: ({ size, color }) => (
             <Package size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="map"
-        options={{
-          title: 'マップ',
-          tabBarIcon: ({ size, color }) => (
-            <Map size={size} color={color} />
           ),
         }}
       />
