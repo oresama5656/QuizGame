@@ -3,89 +3,57 @@ import { View, Text, StyleSheet, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameState } from '@/hooks/useGameState';
 import { router } from 'expo-router';
-import QuizComponent from '@/app/components/QuizComponent';
-
-// 仮のクイズデータ
-const QUIZ_DATA = [
-  {
-    productName: 'アスピリン',
-    genericName: 'アセチルサリチル酸',
-    options: ['アセチルサリチル酸', 'イブプロフェン', 'アセトアミノフェン', 'ロキソプロフェン']
-  },
-  {
-    productName: 'イブ',
-    genericName: 'イブプロフェン',
-    options: ['アセチルサリチル酸', 'イブプロフェン', 'アセトアミノフェン', 'ロキソプロフェン']
-  },
-  {
-    productName: 'カロナール',
-    genericName: 'アセトアミノフェン',
-    options: ['アセチルサリチル酸', 'イブプロフェン', 'アセトアミノフェン', 'ロキソプロフェン']
-  },
-  {
-    productName: 'ロキソニン',
-    genericName: 'ロキソプロフェン',
-    options: ['アセチルサリチル酸', 'イブプロフェン', 'アセトアミノフェン', 'ロキソプロフェン']
-  }
-];
+import QuizBattleScreen from '@/app/components/QuizBattleScreen';
+import { QUIZ_DATA } from '@/app/data/quizData';
 
 export default function BattleScreen() {
   const { gameState, updateGameState } = useGameState();
-  const [battleCount, setBattleCount] = useState(0);
-  const [currentQuiz, setCurrentQuiz] = useState(QUIZ_DATA[0]);
+  const [currentEnemy, setCurrentEnemy] = useState({
+    id: 'slime',
+    name: 'スライム',
+    image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
+    hp: 30,
+    maxHp: 30,
+  });
 
   useEffect(() => {
     if (!gameState.inBattle) {
       router.replace('/map');
       return;
     }
-
-    // 戦闘開始時にランダムなクイズを設定
-    setCurrentQuiz(QUIZ_DATA[Math.floor(Math.random() * QUIZ_DATA.length)]);
   }, [gameState.inBattle]);
 
-  const handleQuizComplete = (isCorrect: boolean) => {
-    if (isCorrect) {
-      setBattleCount(prev => {
-        const newCount = prev + 1;
-        if (newCount >= 10) {
-          // 10連戦クリア
-          updateGameState({ 
-            inBattle: false,
-            exp: gameState.exp + 100, // 経験値獲得
-            gold: gameState.gold + 50  // ゴールド獲得
-          });
-          Alert.alert('10連戦クリア！', 'おめでとうございます！', [
-            { text: 'OK', onPress: () => router.replace('/map') }
-          ]);
-        } else {
-          // 次のクイズを設定
-          setCurrentQuiz(QUIZ_DATA[Math.floor(Math.random() * QUIZ_DATA.length)]);
-        }
-        return newCount;
+  const handleBattleComplete = (victory: boolean) => {
+    if (victory) {
+      // 勝利時の処理
+      const expGained = 200;
+      const goldGained = 100;
+      
+      updateGameState({ 
+        inBattle: false,
+        exp: gameState.exp + expGained,
+        gold: gameState.gold + goldGained
       });
+      
+      Alert.alert(
+        '戦闘勝利！', 
+        `10体の敵を倒しました！\n経験値: +${expGained}\nゴールド: +${goldGained}`,
+        [{ text: 'OK', onPress: () => router.replace('/map') }]
+      );
     } else {
-      // 不正解の場合、HPが減少
-      const damage = Math.floor(Math.random() * 10) + 5; // 5-15のダメージ
-      const newHp = Math.max(1, gameState.hp - damage);
-      updateGameState({ hp: newHp });
-
-      if (newHp <= 1) {
-        // HPが1になったら戦闘終了
-        updateGameState({ inBattle: false });
-        Alert.alert('戦闘終了', 'HPが危険な状態になりました。', [
-          { text: 'OK', onPress: () => router.replace('/map') }
-        ]);
-      } else {
-        // 次のクイズを設定
-        setCurrentQuiz(QUIZ_DATA[Math.floor(Math.random() * QUIZ_DATA.length)]);
-      }
+      // 敗北時の処理
+      updateGameState({ inBattle: false });
+      Alert.alert(
+        '戦闘敗北...', 
+        'HPが危険な状態になりました。',
+        [{ text: 'OK', onPress: () => router.replace('/map') }]
+      );
     }
   };
 
   if (!gameState.inBattle) {
     return (
-      <LinearGradient colors={['#1a237e', '#3949ab']} style={styles.container}>
+      <LinearGradient colors={['#2c1810', '#4a2c1a']} style={styles.container}>
         <View style={styles.noBattleContainer}>
           <Text style={styles.noBattleText}>戦闘はありません</Text>
         </View>
@@ -94,48 +62,17 @@ export default function BattleScreen() {
   }
 
   return (
-    <LinearGradient colors={['#1a237e', '#3949ab']} style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>戦闘</Text>
-        <Text style={styles.battleCount}>連続正解: {battleCount}/10</Text>
-      </View>
-
-      <View style={styles.battleContent}>
-        <QuizComponent
-          question={currentQuiz.productName}
-          options={currentQuiz.options}
-          correctAnswer={currentQuiz.genericName}
-          onComplete={handleQuizComplete}
-        />
-      </View>
-    </LinearGradient>
+    <QuizBattleScreen
+      quizData={QUIZ_DATA}
+      enemy={currentEnemy}
+      onBattleComplete={handleBattleComplete}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    padding: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  battleCount: {
-    fontSize: 18,
-    color: '#fff',
-  },
-  battleContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
   },
   noBattleContainer: {
     flex: 1,
