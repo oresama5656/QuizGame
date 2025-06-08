@@ -93,15 +93,16 @@ export default function MapScreen() {
     if (location.type === 'dungeon' || location.type === 'boss') {
       updateGameState({ 
         inBattle: false,
+        currentLocation: location.id
       });
       
       setTimeout(() => {
         updateGameState({ 
-          inBattle: true, 
-          currentLocation: location.id,
+          inBattle: true,
           hp: gameState.maxHp,
           mp: gameState.maxMp
         });
+        
         router.push('/battle');
       }, 100);
     } else if (location.type === 'safe') {

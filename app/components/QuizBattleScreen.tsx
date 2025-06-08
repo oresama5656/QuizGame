@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, ImageBackground, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameState } from '@/hooks/useGameState';
 import { Sword, Zap } from 'lucide-react-native';
@@ -29,6 +29,7 @@ export default function QuizBattleScreen({
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [enemyCount, setEnemyCount] = useState(0);
   const [currentEnemy, setCurrentEnemy] = useState(enemy);
+  const [battleEnded, setBattleEnded] = useState(false);
   
   // アニメーション用の値
   const [fadeAnim] = useState(new Animated.Value(1));
@@ -37,8 +38,13 @@ export default function QuizBattleScreen({
   const [damageAnim] = useState(new Animated.Value(0));
   const [slashAnim] = useState(new Animated.Value(0));
 
+  // アラートが表示されたかを追跡するRef
+  const alertShownRef = useRef(false);
+
   useEffect(() => {
     generateNewQuiz();
+    // マウント時にリセット
+    alertShownRef.current = false;
   }, []);
 
   useEffect(() => {
@@ -122,7 +128,7 @@ export default function QuizBattleScreen({
   };
 
   const handleAnswerSelect = (answer: string) => {
-    if (selectedAnswer || !currentQuiz) return;
+    if (selectedAnswer || !currentQuiz || battleEnded) return;
     
     setSelectedAnswer(answer);
     const correct = answer === currentQuiz.genericName;
@@ -139,27 +145,29 @@ export default function QuizBattleScreen({
         playDamageAnimation();
         
         if (newEnemyHp <= 0) {
-          // 敵を倒した - ダメージ演出と勝利通知のタイミングを調整
-          // 少し間を空けてからエフェクトを開始
-          playDamageAnimation(); // ダメージ表示
+          // 敵を倒した場合の処理
+          setBattleEnded(true); // 戦闘終了フラグを立てる
           
-          // ダメージアニメーション表示後に勝利通知
-          setTimeout(() => {
-            // 確実に勝利通知が表示されるように直接呼び出し
-            onBattleComplete(true);
-          }, 1200); // ダメージエフェクトが完了する時間に合わせる
+          // 1. ダメージエフェクトを表示
+          playDamageAnimation();
           
-          // フェードアウトは別途実行（見た目だけの演出）
+          // 2. 敵のフェードアウトアニメーション
+          Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          }).start();
+          
+          // 3. 討伐数更新
+          setEnemyCount(prev => prev + 1);
+          
+          // 4. アニメーション完了後に討伐メッセージを表示
           setTimeout(() => {
-            Animated.timing(fadeAnim, {
-              toValue: 0,
-              duration: 300,
-              useNativeDriver: true,
-            }).start(() => {
-              const newCount = enemyCount + 1;
-              setEnemyCount(newCount);
-            });
-          }, 500);
+            if (!alertShownRef.current) {
+              alertShownRef.current = true;
+              onBattleComplete(true);
+            }
+          }, 1000);
         } else {
           // 敵はまだ生きている
           setTimeout(() => {
@@ -175,8 +183,12 @@ export default function QuizBattleScreen({
         updateGameState({ hp: newHp });
         
         if (newHp <= 1) {
+          setBattleEnded(true); // 戦闘終了フラグを立てる
           setTimeout(() => {
-            onBattleComplete(false);
+            if (!alertShownRef.current) {
+              alertShownRef.current = true;
+              onBattleComplete(false);
+            }
           }, 1000);
         } else {
           setTimeout(() => {
@@ -334,7 +346,7 @@ export default function QuizBattleScreen({
                   selectedAnswer === option && styles.selectedOption,
                 ]}
                 onPress={() => handleAnswerSelect(option)}
-                disabled={selectedAnswer !== null}
+                disabled={selectedAnswer !== null || battleEnded}
               >
                 <View style={styles.optionContent}>
                   <View style={styles.optionNumber}>

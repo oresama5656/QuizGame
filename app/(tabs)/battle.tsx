@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameState } from '@/hooks/useGameState';
@@ -20,10 +20,17 @@ export default function BattleScreen() {
   const { gameState, updateGameState } = useGameState();
   const [currentEnemy, setCurrentEnemy] = useState<Enemy>(getRandomEnemyForLocation('forest'));
   const [battleBackground, setBattleBackground] = useState(BATTLE_BACKGROUNDS[0]);
-  // 戦闘中かどうかを制御するローカルステート
   const [battleInProgress, setBattleInProgress] = useState(true);
+  
+  // アラートが表示されたかどうかを追跡
+  const alertShownRef = useRef(false);
+  const battleCompleteHandledRef = useRef(false);
 
   useEffect(() => {
+    // コンポーネントがマウントされたときにリセット
+    alertShownRef.current = false;
+    battleCompleteHandledRef.current = false;
+    
     // ゲームステートが更新されたときに戦闘状態を同期
     if (gameState.inBattle) {
       setBattleInProgress(true);
@@ -35,7 +42,7 @@ export default function BattleScreen() {
     const backgroundIndex = getBattleBackgroundIndex(gameState.currentLocation);
     setBattleBackground(BATTLE_BACKGROUNDS[backgroundIndex]);
 
-    // 敵の情報をセット（共通の敵データ関数を使用）
+    // 敵の情報をセット
     setCurrentEnemy(getRandomEnemyForLocation(gameState.currentLocation));
   }, [gameState.currentLocation, gameState.inBattle]);
 
@@ -55,66 +62,67 @@ export default function BattleScreen() {
   };
 
   const handleBattleComplete = (victory: boolean) => {
-    // 戦闘完了をローカルで記録
-    setBattleInProgress(false);
+    // 既に処理済みの場合は早期リターン
+    if (battleCompleteHandledRef.current) {
+      return;
+    }
+    
+    // 処理済みフラグを設定
+    battleCompleteHandledRef.current = true;
     
     if (victory) {
       // 勝利時の処理
       const expGained = 300;
       const goldGained = 150;
       
-      // 先にAlertを表示し、ユーザーの操作後にステート更新とルーティングを行う
+      // 先にゲーム状態を更新
+      updateGameState({ 
+        inBattle: false,
+        exp: gameState.exp + expGained,
+        gold: gameState.gold + goldGained
+      });
+      
+      // 戦闘進行中フラグを解除
+      setBattleInProgress(false);
+      
+      // Alertを表示
       Alert.alert(
         '🎉 戦闘勝利！', 
         `敵を討伐しました！\n\n💫 経験値: +${expGained}\n💰 ゴールド: +${goldGained}`,
         [
           { 
-            text: '再挑戦する', 
-            onPress: () => {
-              // 先にステートを更新してからマップに戻る
-              updateGameState({ 
-                inBattle: false,
-                exp: gameState.exp + expGained,
-                gold: gameState.gold + goldGained
-              });
-              // マップページに一度戻る
-              router.replace('/map');
-            } 
-          },
-          { 
             text: 'マップに戻る', 
             onPress: () => {
-              // 先にステートを更新してからマップに戻る
-              updateGameState({ 
-                inBattle: false,
-                exp: gameState.exp + expGained,
-                gold: gameState.gold + goldGained
-              });
               router.replace('/map');
-            },
-            style: 'cancel'
+            }
           }
-        ]
+        ],
+        { cancelable: false } // Androidでバックボタンでの閉じるを防止
       );
     } else {
-      // 敗北時の処理 - 同様に順序を変更
+      // 敗北時の処理
+      // 先にゲーム状態を更新
+      updateGameState({ inBattle: false });
+      
+      // 戦闘進行中フラグを解除
+      setBattleInProgress(false);
+      
       Alert.alert(
         '💀 戦闘敗北...', 
         'HPが危険な状態になりました。\n体力を回復してから再挑戦しましょう。',
         [{ 
           text: 'マップに戻る', 
           onPress: () => {
-            updateGameState({ inBattle: false });
             router.replace('/map');
           } 
-        }]
+        }],
+        { cancelable: false }
       );
     }
   };
 
-  // 戦闘画面が表示されたときに強制的に戦闘状態にする
   // battleInProgressがfalseの場合のみ、「戦闘はありません」画面を表示
-  if (!battleInProgress) {
+  if (!gameState.inBattle && !battleInProgress) {
     return (
       <LinearGradient colors={['#2c1810', '#4a2c1a']} style={styles.container}>
         <View style={styles.noBattleContainer}>
