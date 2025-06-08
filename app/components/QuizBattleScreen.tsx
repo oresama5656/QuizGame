@@ -30,6 +30,10 @@ export default function QuizBattleScreen({
   const [enemyCount, setEnemyCount] = useState(0);
   const [currentEnemy, setCurrentEnemy] = useState(enemy);
   const [battleEnded, setBattleEnded] = useState(false);
+  const [showVictoryMessage, setShowVictoryMessage] = useState(false);
+  
+  // 敵の最大数を2に設定
+  const MAX_ENEMIES = 2;
   
   // アニメーション用の値
   const [fadeAnim] = useState(new Animated.Value(1));
@@ -37,6 +41,7 @@ export default function QuizBattleScreen({
   const [attackAnim] = useState(new Animated.Value(0));
   const [damageAnim] = useState(new Animated.Value(0));
   const [slashAnim] = useState(new Animated.Value(0));
+  const [damageValue, setDamageValue] = useState(0);
 
   // アラートが表示されたかを追跡するRef
   const alertShownRef = useRef(false);
@@ -139,14 +144,16 @@ export default function QuizBattleScreen({
       
       setTimeout(() => {
         const damage = Math.floor(Math.random() * 20) + 15; // 15-35のダメージ
+        setDamageValue(damage); // ダメージ値を状態に保存
         const newEnemyHp = Math.max(0, currentEnemy.hp - damage);
         
         setCurrentEnemy(prev => ({ ...prev, hp: newEnemyHp }));
         playDamageAnimation();
         
         if (newEnemyHp <= 0) {
-          // 敵を倒した場合の処理
-          setBattleEnded(true); // 戦闘終了フラグを立てる
+          // 敵を倒した場合
+          const newEnemyCount = enemyCount + 1;
+          setEnemyCount(newEnemyCount);
           
           // 1. ダメージエフェクトを表示
           playDamageAnimation();
@@ -158,16 +165,28 @@ export default function QuizBattleScreen({
             useNativeDriver: true,
           }).start();
           
-          // 3. 討伐数更新
-          setEnemyCount(prev => prev + 1);
+          // 敵の撃破メッセージを表示
+          setShowVictoryMessage(true);
           
-          // 4. アニメーション完了後に討伐メッセージを表示
           setTimeout(() => {
-            if (!alertShownRef.current) {
-              alertShownRef.current = true;
-              onBattleComplete(true);
+            // 設定した最大数の敵を倒したかチェック
+            if (newEnemyCount >= MAX_ENEMIES) {
+              // すべての敵を倒した場合は戦闘終了
+              setBattleEnded(true);
+              if (!alertShownRef.current) {
+                alertShownRef.current = true;
+                onBattleComplete(true);
+              }
+            } else {
+              // まだ敵が残っているので次の敵を生成
+              setShowVictoryMessage(false);
+              generateNextEnemy();
+              // フェードアニメーションをリセット
+              fadeAnim.setValue(1);
+              // 次のクイズを生成
+              generateNewQuiz();
             }
-          }, 1000);
+          }, 1500);
         } else {
           // 敵はまだ生きている
           setTimeout(() => {
@@ -203,7 +222,7 @@ export default function QuizBattleScreen({
     // 現在の場所に基づいて次の敵を生成
     const locationId = gameState.currentLocation || 'forest';
     const newEnemy = getRandomEnemyForLocation(locationId);
-    setCurrentEnemy(newEnemy);
+    setCurrentEnemy({...newEnemy, hp: newEnemy.maxHp}); // HPを最大値に設定
   };
 
   if (!currentQuiz) {
@@ -271,7 +290,7 @@ export default function QuizBattleScreen({
         <View style={styles.statusBar}>
           <View style={styles.statusItem}>
             <Text style={styles.statusLabel}>討伐数</Text>
-            <Text style={styles.statusValue}>{enemyCount}/1</Text>
+            <Text style={styles.statusValue}>{enemyCount}/{MAX_ENEMIES}</Text>
           </View>
           <View style={styles.statusItem}>
             <Text style={styles.statusLabel}>HP</Text>
@@ -289,6 +308,12 @@ export default function QuizBattleScreen({
 
         {/* 敵キャラクター表示エリア */}
         <View style={styles.enemyArea}>
+          {showVictoryMessage && (
+            <View style={styles.victoryMessageContainer}>
+              <Text style={styles.victoryMessage}>敵を撃破！</Text>
+            </View>
+          )}
+          
           <Animated.View style={[styles.enemyContainer, { opacity: fadeAnim }, shakeTransform]}>
             <Image source={{ uri: currentEnemy.image }} style={styles.enemyImage} />
             <Text style={styles.enemyName}>{currentEnemy.name}</Text>
@@ -321,7 +346,7 @@ export default function QuizBattleScreen({
 
           {/* ダメージ数値 */}
           <Animated.View style={[styles.damageNumber, damageTransform]}>
-            <Text style={styles.damageText}>-25</Text>
+            <Text style={styles.damageText}>-{damageValue}</Text>
           </Animated.View>
         </View>
 
@@ -580,5 +605,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 100,
     fontWeight: 'bold',
+  },
+  victoryMessageContainer: {
+    position: 'absolute',
+    top: '30%',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  victoryMessage: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffd700',
+    textShadowColor: '#000',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+    backgroundColor: 'rgba(139, 69, 19, 0.8)',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#ffd700',
   },
 });

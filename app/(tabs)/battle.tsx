@@ -72,8 +72,8 @@ export default function BattleScreen() {
     
     if (victory) {
       // 勝利時の処理
-      const expGained = 300;
-      const goldGained = 150;
+      const expGained = 600; // 2体分の経験値に増加
+      const goldGained = 300; // 2体分の金額に増加
       
       // 先にゲーム状態を更新
       updateGameState({ 
@@ -88,7 +88,7 @@ export default function BattleScreen() {
       // Alertを表示
       Alert.alert(
         '🎉 戦闘勝利！', 
-        `敵を討伐しました！\n\n💫 経験値: +${expGained}\n💰 ゴールド: +${goldGained}`,
+        `2体の敵を討伐しました！\n\n💫 経験値: +${expGained}\n💰 ゴールド: +${goldGained}`,
         [
           { 
             text: 'マップに戻る', 
