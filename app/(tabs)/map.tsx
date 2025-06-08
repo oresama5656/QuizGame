@@ -39,7 +39,7 @@ export default function MapScreen() {
       name: '霧の山',
       description: '雲に覆われた険しい山道。強力なモンスターが潜んでいる。',
       image: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=300',
-      level: 5,
+      level: 1,
       unlocked: gameState.level >= 5,
       completed: false,
       type: 'dungeon',
