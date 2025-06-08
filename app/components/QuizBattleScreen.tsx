@@ -139,33 +139,27 @@ export default function QuizBattleScreen({
         playDamageAnimation();
         
         if (newEnemyHp <= 0) {
-          // 敵を倒した
+          // 敵を倒した - ダメージ演出と勝利通知のタイミングを調整
+          // 少し間を空けてからエフェクトを開始
+          playDamageAnimation(); // ダメージ表示
+          
+          // ダメージアニメーション表示後に勝利通知
+          setTimeout(() => {
+            // 確実に勝利通知が表示されるように直接呼び出し
+            onBattleComplete(true);
+          }, 1200); // ダメージエフェクトが完了する時間に合わせる
+          
+          // フェードアウトは別途実行（見た目だけの演出）
           setTimeout(() => {
             Animated.timing(fadeAnim, {
               toValue: 0,
-              duration: 500,
+              duration: 300,
               useNativeDriver: true,
             }).start(() => {
               const newCount = enemyCount + 1;
               setEnemyCount(newCount);
-              
-              if (newCount >= 1) {
-                // 1体倒してクリアに変更
-                onBattleComplete(true);
-              } else {
-                // 次の敵を生成
-                generateNextEnemy();
-                generateNewQuiz();
-                
-                // フェードイン
-                Animated.timing(fadeAnim, {
-                  toValue: 1,
-                  duration: 500,
-                  useNativeDriver: true,
-                }).start();
-              }
             });
-          }, 1000);
+          }, 500);
         } else {
           // 敵はまだ生きている
           setTimeout(() => {

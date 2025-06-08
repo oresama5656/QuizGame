@@ -20,15 +20,24 @@ export default function BattleScreen() {
   const { gameState, updateGameState } = useGameState();
   const [currentEnemy, setCurrentEnemy] = useState<Enemy>(getRandomEnemyForLocation('forest'));
   const [battleBackground, setBattleBackground] = useState(BATTLE_BACKGROUNDS[0]);
+  // 戦闘中かどうかを制御するローカルステート
+  const [battleInProgress, setBattleInProgress] = useState(true);
 
   useEffect(() => {
-    // 現在の場所に応じて背景を設定（inBattleチェックを削除）
+    // ゲームステートが更新されたときに戦闘状態を同期
+    if (gameState.inBattle) {
+      setBattleInProgress(true);
+    }
+  }, [gameState.inBattle]);
+
+  useEffect(() => {
+    // 現在の場所に応じて背景を設定
     const backgroundIndex = getBattleBackgroundIndex(gameState.currentLocation);
     setBattleBackground(BATTLE_BACKGROUNDS[backgroundIndex]);
 
     // 敵の情報をセット（共通の敵データ関数を使用）
     setCurrentEnemy(getRandomEnemyForLocation(gameState.currentLocation));
-  }, [gameState.currentLocation, gameState.inBattle]); // inBattleを依存配列に追加
+  }, [gameState.currentLocation, gameState.inBattle]);
 
   const getBattleBackgroundIndex = (location: string): number => {
     switch (location) {
@@ -46,49 +55,66 @@ export default function BattleScreen() {
   };
 
   const handleBattleComplete = (victory: boolean) => {
+    // 戦闘完了をローカルで記録
+    setBattleInProgress(false);
+    
     if (victory) {
       // 勝利時の処理
       const expGained = 300;
       const goldGained = 150;
       
-      updateGameState({ 
-        inBattle: false,
-        exp: gameState.exp + expGained,
-        gold: gameState.gold + goldGained
-      });
-      
+      // 先にAlertを表示し、ユーザーの操作後にステート更新とルーティングを行う
       Alert.alert(
-        '�� 戦闘勝利！', 
+        '🎉 戦闘勝利！', 
         `敵を討伐しました！\n\n💫 経験値: +${expGained}\n💰 ゴールド: +${goldGained}`,
         [
           { 
             text: '再挑戦する', 
             onPress: () => {
-              // マップページに一度戻ってすぐに再戦闘開始
+              // 先にステートを更新してからマップに戻る
+              updateGameState({ 
+                inBattle: false,
+                exp: gameState.exp + expGained,
+                gold: gameState.gold + goldGained
+              });
+              // マップページに一度戻る
               router.replace('/map');
             } 
           },
           { 
             text: 'マップに戻る', 
-            onPress: () => router.replace('/map'),
+            onPress: () => {
+              // 先にステートを更新してからマップに戻る
+              updateGameState({ 
+                inBattle: false,
+                exp: gameState.exp + expGained,
+                gold: gameState.gold + goldGained
+              });
+              router.replace('/map');
+            },
             style: 'cancel'
           }
         ]
       );
     } else {
-      // 敗北時の処理
-      updateGameState({ inBattle: false });
+      // 敗北時の処理 - 同様に順序を変更
       Alert.alert(
         '💀 戦闘敗北...', 
         'HPが危険な状態になりました。\n体力を回復してから再挑戦しましょう。',
-        [{ text: 'マップに戻る', onPress: () => router.replace('/map') }]
+        [{ 
+          text: 'マップに戻る', 
+          onPress: () => {
+            updateGameState({ inBattle: false });
+            router.replace('/map');
+          } 
+        }]
       );
     }
   };
 
   // 戦闘画面が表示されたときに強制的に戦闘状態にする
-  // これにより、マップから直接アクセスした場合にのみ戦闘が始まる
-  if (!gameState.inBattle) {
+  // battleInProgressがfalseの場合のみ、「戦闘はありません」画面を表示
+  if (!battleInProgress) {
     return (
       <LinearGradient colors={['#2c1810', '#4a2c1a']} style={styles.container}>
         <View style={styles.noBattleContainer}>
