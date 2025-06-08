@@ -79,5 +79,30 @@ export const QUIZ_DATA: QuizData[] = [
     productName: 'ジルテック',
     genericName: 'セチリジン',
     options: ['フェキソフェナジン', 'ロラタジン', 'セチリジン', 'レボセチリジン']
+  },
+  {
+    productName: 'プレドニン',
+    genericName: 'プレドニゾロン',
+    options: ['プレドニゾロン', 'ヒドロコルチゾン', 'デキサメタゾン', 'ベタメタゾン']
+  },
+  {
+    productName: 'リンデロン',
+    genericName: 'ベタメタゾン',
+    options: ['プレドニゾロン', 'ヒドロコルチゾン', 'デキサメタゾン', 'ベタメタゾン']
+  },
+  {
+    productName: 'フロモックス',
+    genericName: 'セフカペンピボキシル',
+    options: ['セフカペンピボキシル', 'アモキシシリン', 'クラリスロマイシン', 'レボフロキサシン']
+  },
+  {
+    productName: 'サワシリン',
+    genericName: 'アモキシシリン',
+    options: ['セフカペンピボキシル', 'アモキシシリン', 'クラリスロマイシン', 'レボフロキサシン']
+  },
+  {
+    productName: 'クラリス',
+    genericName: 'クラリスロマイシン',
+    options: ['セフカペンピボキシル', 'アモキシシリン', 'クラリスロマイシン', 'レボフロキサシン']
   }
 ];
