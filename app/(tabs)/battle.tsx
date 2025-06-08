@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameState } from '@/hooks/useGameState';
 import { router } from 'expo-router';
@@ -27,15 +27,13 @@ export default function BattleScreen() {
   const [battleBackground, setBattleBackground] = useState(BATTLE_BACKGROUNDS[0]);
 
   useEffect(() => {
-    if (!gameState.inBattle) {
-      router.replace('/map');
-      return;
-    }
-
-    // 現在の場所に応じて背景を設定
+    // 現在の場所に応じて背景を設定（inBattleチェックを削除）
     const backgroundIndex = getBattleBackgroundIndex(gameState.currentLocation);
     setBattleBackground(BATTLE_BACKGROUNDS[backgroundIndex]);
-  }, [gameState.inBattle, gameState.currentLocation]);
+
+    // 敵の情報をセット（現在のロケーションに応じて敵を変える場合はここで処理）
+    setCurrentEnemy(getEnemyForLocation(gameState.currentLocation));
+  }, [gameState.currentLocation, gameState.inBattle]); // inBattleを依存配列に追加
 
   const getBattleBackgroundIndex = (location: string): number => {
     switch (location) {
@@ -49,6 +47,52 @@ export default function BattleScreen() {
         return 4; // 城
       default:
         return 0; // デフォルトは森
+    }
+  };
+
+  const getEnemyForLocation = (location: string) => {
+    // 場所に応じた敵を返す
+    switch (location) {
+      case 'forest':
+        return {
+          id: 'slime',
+          name: 'スライム',
+          image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
+          hp: 60,
+          maxHp: 60,
+        };
+      case 'mountain':
+        return {
+          id: 'golem',
+          name: '石のゴーレム',
+          image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
+          hp: 100,
+          maxHp: 100,
+        };
+      case 'desert':
+        return {
+          id: 'sandworm',
+          name: 'サンドワーム',
+          image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
+          hp: 120,
+          maxHp: 120,
+        };
+      case 'castle':
+        return {
+          id: 'dragon',
+          name: 'ドラゴン',
+          image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
+          hp: 200,
+          maxHp: 200,
+        };
+      default:
+        return {
+          id: 'slime',
+          name: 'スライム',
+          image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
+          hp: 60,
+          maxHp: 60,
+        };
     }
   };
 
@@ -80,11 +124,19 @@ export default function BattleScreen() {
     }
   };
 
+  // 戦闘画面が表示されたときに強制的に戦闘状態にする
+  // これにより、マップから直接アクセスした場合にのみ戦闘が始まる
   if (!gameState.inBattle) {
     return (
       <LinearGradient colors={['#2c1810', '#4a2c1a']} style={styles.container}>
         <View style={styles.noBattleContainer}>
           <Text style={styles.noBattleText}>戦闘はありません</Text>
+          <TouchableOpacity 
+            style={styles.returnButton}
+            onPress={() => router.replace('/map')}
+          >
+            <Text style={styles.returnButtonText}>マップに戻る</Text>
+          </TouchableOpacity>
         </View>
       </LinearGradient>
     );
@@ -113,5 +165,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#fff',
     fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  returnButton: {
+    backgroundColor: '#3949ab',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  returnButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });

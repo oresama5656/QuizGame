@@ -362,24 +362,26 @@ export default function QuizBattleScreen({
 
         {/* 選択肢エリア */}
         <View style={styles.optionsArea}>
-          {currentQuiz.options.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.optionButton,
-                selectedAnswer === option && styles.selectedOption,
-              ]}
-              onPress={() => handleAnswerSelect(option)}
-              disabled={selectedAnswer !== null}
-            >
-              <View style={styles.optionContent}>
-                <View style={styles.optionNumber}>
-                  <Text style={styles.optionNumberText}>{index + 1}</Text>
+          <View style={styles.optionsGrid}>
+            {currentQuiz.options.map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.optionButton,
+                  selectedAnswer === option && styles.selectedOption,
+                ]}
+                onPress={() => handleAnswerSelect(option)}
+                disabled={selectedAnswer !== null}
+              >
+                <View style={styles.optionContent}>
+                  <View style={styles.optionNumber}>
+                    <Text style={styles.optionNumberText}>{index + 1}</Text>
+                  </View>
+                  <Text style={styles.optionText}>{option}</Text>
                 </View>
-                <Text style={styles.optionText}>{option}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       </LinearGradient>
     </ImageBackground>
@@ -542,7 +544,12 @@ const styles = StyleSheet.create({
     flex: 0.35,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    justifyContent: 'space-around',
+    justifyContent: 'center',
+  },
+  optionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   optionButton: {
     backgroundColor: 'rgba(101, 67, 33, 0.95)',
@@ -550,6 +557,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#8b4513',
     marginVertical: 4,
+    width: '48%',  // ボタンの幅を48%に設定して2列に
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,

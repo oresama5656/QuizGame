@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MapPin, Lock, CircleCheck as CheckCircle, Star, Sword, Crown } from 'lucide-react-native';
 import { useGameState } from '@/hooks/useGameState';
@@ -91,8 +91,21 @@ export default function MapScreen() {
 
   const handleExplore = (location: any) => {
     if (location.type === 'dungeon' || location.type === 'boss') {
-      updateGameState({ inBattle: true, currentLocation: location.id });
-      router.push('/battle');
+      updateGameState({ 
+        inBattle: false,
+      });
+      
+      setTimeout(() => {
+        updateGameState({ 
+          inBattle: true, 
+          currentLocation: location.id,
+          hp: gameState.maxHp,
+          mp: gameState.maxMp
+        });
+        router.push('/battle');
+      }, 100);
+    } else if (location.type === 'safe') {
+      Alert.alert('安全地帯', `${location.name}は安全な場所です。休息できます。`);
     }
   };
 

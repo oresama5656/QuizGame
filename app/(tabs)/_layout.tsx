@@ -4,6 +4,7 @@ import { Sword, User, Package, Map } from 'lucide-react-native';
 export default function TabLayout() {
   return (
     <Tabs
+      initialRouteName="map"
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
