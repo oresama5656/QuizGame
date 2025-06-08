@@ -88,7 +88,7 @@ export default function BattleScreen() {
       
       // 戦闘進行中フラグを解除
       setBattleInProgress(false);
-      
+      //現在機能していない
       // Alertを表示
       Alert.alert(
         '🎉 戦闘勝利！', 
