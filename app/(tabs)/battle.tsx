@@ -75,11 +75,15 @@ export default function BattleScreen() {
       const expGained = 600; // 2体分の経験値に増加
       const goldGained = 300; // 2体分の金額に増加
       
-      // 先にゲーム状態を更新
-      updateGameState({ 
+      // 現在のゲームステートを維持しながら必要な値だけを更新
+      const newExp = gameState.exp + expGained;
+      const newGold = gameState.gold + goldGained;
+      
+      // ゲーム状態を更新
+      updateGameState({
         inBattle: false,
-        exp: gameState.exp + expGained,
-        gold: gameState.gold + goldGained
+        exp: newExp,
+        gold: newGold
       });
       
       // 戦闘進行中フラグを解除
@@ -91,18 +95,21 @@ export default function BattleScreen() {
         `2体の敵を討伐しました！\n\n💫 経験値: +${expGained}\n💰 ゴールド: +${goldGained}`,
         [
           { 
-            text: 'マップに戻る', 
+            text: 'マップ選択画面に戻る', 
             onPress: () => {
-              router.replace('/map');
+              router.back();
             }
           }
         ],
-        { cancelable: false } // Androidでバックボタンでの閉じるを防止
+        { cancelable: false }
       );
     } else {
       // 敗北時の処理
-      // 先にゲーム状態を更新
-      updateGameState({ inBattle: false });
+      // ゲーム状態を更新
+      updateGameState({
+        inBattle: false,
+        hp: Math.max(1, gameState.hp) // HPが0になることを防止
+      });
       
       // 戦闘進行中フラグを解除
       setBattleInProgress(false);
@@ -111,9 +118,9 @@ export default function BattleScreen() {
         '💀 戦闘敗北...', 
         'HPが危険な状態になりました。\n体力を回復してから再挑戦しましょう。',
         [{ 
-          text: 'マップに戻る', 
+          text: 'マップ選択画面に戻る', 
           onPress: () => {
-            router.replace('/map');
+            router.back();
           } 
         }],
         { cancelable: false }
@@ -121,30 +128,24 @@ export default function BattleScreen() {
     }
   };
 
-  // battleInProgressがfalseの場合のみ、「戦闘はありません」画面を表示
+  // 戦闘が終了している場合はマップ選択画面に戻る
   if (!gameState.inBattle && !battleInProgress) {
-    return (
-      <LinearGradient colors={['#2c1810', '#4a2c1a']} style={styles.container}>
-        <View style={styles.noBattleContainer}>
-          <Text style={styles.noBattleText}>戦闘はありません</Text>
-          <TouchableOpacity 
-            style={styles.returnButton}
-            onPress={() => router.replace('/map')}
-          >
-            <Text style={styles.returnButtonText}>マップに戻る</Text>
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-    );
+    router.back();
+    return null;
   }
 
+  // 戦闘画面のメインコンテンツを表示
   return (
-    <QuizBattleScreen
-      quizData={QUIZ_DATA}
-      enemy={currentEnemy}
-      onBattleComplete={handleBattleComplete}
-      backgroundImage={battleBackground}
-    />
+    <LinearGradient colors={['#2c1810', '#4a2c1a']} style={styles.container}>
+      <View style={styles.contentContainer}>
+        <QuizBattleScreen
+          quizData={QUIZ_DATA}
+          enemy={currentEnemy}
+          onBattleComplete={handleBattleComplete}
+          backgroundImage={battleBackground}
+        />
+      </View>
+    </LinearGradient>
   );
 }
 
@@ -152,27 +153,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  noBattleContainer: {
+  contentContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  noBattleText: {
-    fontSize: 20,
-    color: '#fff',
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  returnButton: {
-    backgroundColor: '#3949ab',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  returnButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
 });
