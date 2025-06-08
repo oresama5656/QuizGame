@@ -14,6 +14,7 @@ export interface GameState {
   gold: number;
   inBattle: boolean;
   currentLocation: string;
+  _nonce?: number;  // 再レンダリングを強制するための一時的な値
 }
 
 const initialState: GameState = {
@@ -77,4 +78,15 @@ export function useGameState() {
     updateGameState,
     resetGameState,
   };
+}
+
+function updateGameState(patch: Partial<GameState>) {
+  console.log('[updateGameState] before', state);
+  console.log('[updateGameState] patch', patch);
+
+  setState(prev => {
+    const next = { ...prev, ...patch };
+    console.log('[updateGameState] after', next);
+    return next;
+  });
 }

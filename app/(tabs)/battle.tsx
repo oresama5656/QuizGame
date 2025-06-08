@@ -16,6 +16,15 @@ const BATTLE_BACKGROUNDS = [
   'https://images.pexels.com/photos/1323550/pexels-photo-1323550.jpeg?auto=compress&cs=tinysrgb&w=800', // 城
 ];
 
+// フォールバックコンポーネント
+const Fallback = () => (
+  <LinearGradient colors={['#2c1810', '#4a2c1a']} style={styles.container}>
+    <View style={styles.contentContainer}>
+      <Text style={styles.loadingText}>戦闘終了中...</Text>
+    </View>
+  </LinearGradient>
+);
+
 export default function BattleScreen() {
   const { gameState, updateGameState } = useGameState();
   const [currentEnemy, setCurrentEnemy] = useState<Enemy>(getRandomEnemyForLocation('forest'));
@@ -36,6 +45,17 @@ export default function BattleScreen() {
       setBattleInProgress(true);
     }
   }, [gameState.inBattle]);
+
+  // 戦闘終了時の処理
+  useEffect(() => {
+    if (!battleInProgress) {
+      updateGameState({
+        inBattle: false,
+        _nonce: Date.now()
+      });
+      router.replace('/map');
+    }
+  }, [battleInProgress]);
 
   useEffect(() => {
     // 現在の場所に応じて背景を設定
@@ -79,16 +99,18 @@ export default function BattleScreen() {
       const newExp = gameState.exp + expGained;
       const newGold = gameState.gold + goldGained;
       
-      // ゲーム状態を更新
+      // 戦闘状態をリセットし、経験値とゴールドを更新
       updateGameState({
         inBattle: false,
+        currentLocation: '',
+        _nonce: Date.now(),
         exp: newExp,
         gold: newGold
       });
       
       // 戦闘進行中フラグを解除
       setBattleInProgress(false);
-      //現在機能していない
+      
       // Alertを表示
       Alert.alert(
         '🎉 戦闘勝利！', 
@@ -96,18 +118,18 @@ export default function BattleScreen() {
         [
           { 
             text: 'マップ選択画面に戻る', 
-            onPress: () => {
-              router.back();
-            }
+            onPress: () => {}  // 空の関数（画面遷移はuseEffectで行う）
           }
         ],
         { cancelable: false }
       );
     } else {
       // 敗北時の処理
-      // ゲーム状態を更新
+      // 戦闘状態をリセットし、HPを更新
       updateGameState({
         inBattle: false,
+        currentLocation: '',
+        _nonce: Date.now(),
         hp: Math.max(1, gameState.hp) // HPが0になることを防止
       });
       
@@ -119,19 +141,16 @@ export default function BattleScreen() {
         'HPが危険な状態になりました。\n体力を回復してから再挑戦しましょう。',
         [{ 
           text: 'マップ選択画面に戻る', 
-          onPress: () => {
-            router.back();
-          } 
+          onPress: () => {}  // 空の関数（画面遷移はuseEffectで行う）
         }],
         { cancelable: false }
       );
     }
   };
 
-  // 戦闘が終了している場合はマップ選択画面に戻る
-  if (!gameState.inBattle && !battleInProgress) {
-    router.back();
-    return null;
+  // 戦闘が終了している場合はフォールバックコンポーネントを表示
+  if (!battleInProgress) {
+    return <Fallback />;
   }
 
   // 戦闘画面のメインコンテンツを表示
@@ -155,5 +174,12 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
+  },
+  loadingText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });

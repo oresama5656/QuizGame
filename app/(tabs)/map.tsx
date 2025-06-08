@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MapPin, Lock, CircleCheck as CheckCircle, Star, Sword, Crown } from 'lucide-react-native';
 import { useGameState } from '@/hooks/useGameState';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 
 export default function MapScreen() {
   const { gameState, updateGameState } = useGameState();
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+
+  // 画面がフォーカスされるたびに実行
+  useFocusEffect(
+    useCallback(() => {
+      // 戦闘状態をリセット（保険として）
+      updateGameState({
+        inBattle: false,
+        _nonce: Date.now()
+      });
+    }, [])
+  );
 
   const locations = [
     {
@@ -40,7 +51,7 @@ export default function MapScreen() {
       description: '雲に覆われた険しい山道。強力なモンスターが潜んでいる。',
       image: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=300',
       level: 2,
-      unlocked: gameState.level >= 5,
+      unlocked: gameState.level >= 2,
       completed: false,
       type: 'dungeon',
       enemies: ['山賊', '石のゴーレム', '氷の精霊'],
@@ -84,27 +95,23 @@ export default function MapScreen() {
     },
   ];
 
-  const handleLocationSelect = (location: any) => {
-    if (!location.unlocked) return;
-    setSelectedLocation(location.id);
+  const handleLocationSelect = (locationId: string) => {
+    setSelectedLocation(null);  // 一度選択をリセット
+    setTimeout(() => {
+      setSelectedLocation(locationId);  // 次フレームで再セット
+    }, 0);
   };
 
   const handleExplore = (location: any) => {
     if (location.type === 'dungeon' || location.type === 'boss') {
       updateGameState({ 
-        inBattle: false,
-        currentLocation: location.id
+        inBattle: true,
+        currentLocation: location.id,
+        hp: gameState.maxHp,
+        mp: gameState.maxMp,
+        _nonce: Date.now()  // 常に新しいオブジェクト参照を渡す
       });
-      
-      setTimeout(() => {
-        updateGameState({ 
-          inBattle: true,
-          hp: gameState.maxHp,
-          mp: gameState.maxMp
-        });
-        
-        router.push('/battle');
-      }, 100);
+      router.push(`/battle?_=${Date.now()}`);  // 毎回違うURLでBattleScreenをマウント
     } else if (location.type === 'safe') {
       Alert.alert(
         '安全地帯', 
@@ -115,7 +122,8 @@ export default function MapScreen() {
             onPress: () => {
               updateGameState({
                 hp: gameState.maxHp,
-                mp: gameState.maxMp
+                mp: gameState.maxMp,
+                _nonce: Date.now()  // 常に新しいオブジェクト参照を渡す
               });
               Alert.alert('回復完了', 'HPとMPが全回復しました！');
             }
@@ -166,7 +174,7 @@ export default function MapScreen() {
                 !location.unlocked && styles.lockedLocation,
                 location.id === selectedLocation && styles.selectedLocation,
               ]}
-              onPress={() => handleLocationSelect(location)}
+              onPress={() => handleLocationSelect(location.id)}
               disabled={!location.unlocked}
             >
               <Image source={{ uri: location.image }} style={styles.locationImage} />
