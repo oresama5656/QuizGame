@@ -3,19 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, ImageBackgro
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameState } from '@/hooks/useGameState';
 import { Sword, Zap } from 'lucide-react-native';
+import { Enemy, getRandomEnemyForLocation } from '@/app/data/enemyData';
 
 interface QuizData {
   productName: string;
   genericName: string;
   options: string[];
-}
-
-interface Enemy {
-  id: string;
-  name: string;
-  image: string;
-  hp: number;
-  maxHp: number;
 }
 
 interface QuizBattleScreenProps {
@@ -47,6 +40,11 @@ export default function QuizBattleScreen({
   useEffect(() => {
     generateNewQuiz();
   }, []);
+
+  useEffect(() => {
+    // 親コンポーネントから新しい敵が渡された場合に更新
+    setCurrentEnemy(enemy);
+  }, [enemy]);
 
   const generateNewQuiz = () => {
     if (quizData.length === 0) return;
@@ -151,8 +149,8 @@ export default function QuizBattleScreen({
               const newCount = enemyCount + 1;
               setEnemyCount(newCount);
               
-              if (newCount >= 10) {
-                // 10体倒してクリア
+              if (newCount >= 1) {
+                // 1体倒してクリアに変更
                 onBattleComplete(true);
               } else {
                 // 次の敵を生成
@@ -196,39 +194,10 @@ export default function QuizBattleScreen({
   };
 
   const generateNextEnemy = () => {
-    const enemies = [
-      {
-        id: 'slime',
-        name: 'スライム',
-        image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
-        hp: 60,
-        maxHp: 60,
-      },
-      {
-        id: 'goblin',
-        name: 'ゴブリン',
-        image: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=300',
-        hp: 80,
-        maxHp: 80,
-      },
-      {
-        id: 'orc',
-        name: 'オーク',
-        image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
-        hp: 100,
-        maxHp: 100,
-      },
-      {
-        id: 'dragon',
-        name: 'ドラゴン',
-        image: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=300',
-        hp: 120,
-        maxHp: 120,
-      },
-    ];
-    
-    const randomEnemy = enemies[Math.floor(Math.random() * enemies.length)];
-    setCurrentEnemy(randomEnemy);
+    // 現在の場所に基づいて次の敵を生成
+    const locationId = gameState.currentLocation || 'forest';
+    const newEnemy = getRandomEnemyForLocation(locationId);
+    setCurrentEnemy(newEnemy);
   };
 
   if (!currentQuiz) {
@@ -296,7 +265,7 @@ export default function QuizBattleScreen({
         <View style={styles.statusBar}>
           <View style={styles.statusItem}>
             <Text style={styles.statusLabel}>討伐数</Text>
-            <Text style={styles.statusValue}>{enemyCount}/10</Text>
+            <Text style={styles.statusValue}>{enemyCount}/1</Text>
           </View>
           <View style={styles.statusItem}>
             <Text style={styles.statusLabel}>HP</Text>

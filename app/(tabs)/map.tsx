@@ -105,7 +105,26 @@ export default function MapScreen() {
         router.push('/battle');
       }, 100);
     } else if (location.type === 'safe') {
-      Alert.alert('安全地帯', `${location.name}は安全な場所です。休息できます。`);
+      Alert.alert(
+        '安全地帯', 
+        `${location.name}は安全な場所です。休息すると全回復します。`,
+        [
+          {
+            text: '休息する',
+            onPress: () => {
+              updateGameState({
+                hp: gameState.maxHp,
+                mp: gameState.maxMp
+              });
+              Alert.alert('回復完了', 'HPとMPが全回復しました！');
+            }
+          },
+          {
+            text: 'キャンセル',
+            style: 'cancel'
+          }
+        ]
+      );
     }
   };
 

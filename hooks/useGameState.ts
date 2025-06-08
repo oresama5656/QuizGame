@@ -24,7 +24,7 @@ const initialState: GameState = {
   maxMp: 30,
   exp: 0,
   expToNext: 100,
-  attack: 20,
+  attack: 2000, // 2000にテスト用に変更
   defense: 10,
   gold: 500,
   inBattle: false,

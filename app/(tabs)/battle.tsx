@@ -5,6 +5,7 @@ import { useGameState } from '@/hooks/useGameState';
 import { router } from 'expo-router';
 import QuizBattleScreen from '@/app/components/QuizBattleScreen';
 import { QUIZ_DATA } from '@/app/data/quizData';
+import { getRandomEnemyForLocation, Enemy } from '@/app/data/enemyData';
 
 // 戦闘背景画像のリスト（差し替え可能）
 const BATTLE_BACKGROUNDS = [
@@ -17,13 +18,7 @@ const BATTLE_BACKGROUNDS = [
 
 export default function BattleScreen() {
   const { gameState, updateGameState } = useGameState();
-  const [currentEnemy, setCurrentEnemy] = useState({
-    id: 'slime',
-    name: 'スライム',
-    image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
-    hp: 60,
-    maxHp: 60,
-  });
+  const [currentEnemy, setCurrentEnemy] = useState<Enemy>(getRandomEnemyForLocation('forest'));
   const [battleBackground, setBattleBackground] = useState(BATTLE_BACKGROUNDS[0]);
 
   useEffect(() => {
@@ -31,8 +26,8 @@ export default function BattleScreen() {
     const backgroundIndex = getBattleBackgroundIndex(gameState.currentLocation);
     setBattleBackground(BATTLE_BACKGROUNDS[backgroundIndex]);
 
-    // 敵の情報をセット（現在のロケーションに応じて敵を変える場合はここで処理）
-    setCurrentEnemy(getEnemyForLocation(gameState.currentLocation));
+    // 敵の情報をセット（共通の敵データ関数を使用）
+    setCurrentEnemy(getRandomEnemyForLocation(gameState.currentLocation));
   }, [gameState.currentLocation, gameState.inBattle]); // inBattleを依存配列に追加
 
   const getBattleBackgroundIndex = (location: string): number => {
@@ -50,52 +45,6 @@ export default function BattleScreen() {
     }
   };
 
-  const getEnemyForLocation = (location: string) => {
-    // 場所に応じた敵を返す
-    switch (location) {
-      case 'forest':
-        return {
-          id: 'slime',
-          name: 'スライム',
-          image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
-          hp: 60,
-          maxHp: 60,
-        };
-      case 'mountain':
-        return {
-          id: 'golem',
-          name: '石のゴーレム',
-          image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
-          hp: 100,
-          maxHp: 100,
-        };
-      case 'desert':
-        return {
-          id: 'sandworm',
-          name: 'サンドワーム',
-          image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
-          hp: 120,
-          maxHp: 120,
-        };
-      case 'castle':
-        return {
-          id: 'dragon',
-          name: 'ドラゴン',
-          image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
-          hp: 200,
-          maxHp: 200,
-        };
-      default:
-        return {
-          id: 'slime',
-          name: 'スライム',
-          image: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=300',
-          hp: 60,
-          maxHp: 60,
-        };
-    }
-  };
-
   const handleBattleComplete = (victory: boolean) => {
     if (victory) {
       // 勝利時の処理
@@ -109,9 +58,22 @@ export default function BattleScreen() {
       });
       
       Alert.alert(
-        '🎉 戦闘勝利！', 
-        `10体の敵を討伐しました！\n\n💫 経験値: +${expGained}\n💰 ゴールド: +${goldGained}`,
-        [{ text: 'マップに戻る', onPress: () => router.replace('/map') }]
+        '�� 戦闘勝利！', 
+        `敵を討伐しました！\n\n💫 経験値: +${expGained}\n💰 ゴールド: +${goldGained}`,
+        [
+          { 
+            text: '再挑戦する', 
+            onPress: () => {
+              // マップページに一度戻ってすぐに再戦闘開始
+              router.replace('/map');
+            } 
+          },
+          { 
+            text: 'マップに戻る', 
+            onPress: () => router.replace('/map'),
+            style: 'cancel'
+          }
+        ]
       );
     } else {
       // 敗北時の処理
