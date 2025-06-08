@@ -31,6 +31,8 @@ export default function BattleScreen() {
   const [battleBackground, setBattleBackground] = useState(BATTLE_BACKGROUNDS[0]);
   const [battleInProgress, setBattleInProgress] = useState(true);
   
+  // 勝敗結果を保持するRef
+  const victoryRef = useRef<boolean | null>(null);
   // アラートが表示されたかどうかを追跡
   const alertShownRef = useRef(false);
   const battleCompleteHandledRef = useRef(false);
@@ -39,6 +41,7 @@ export default function BattleScreen() {
     // コンポーネントがマウントされたときにリセット
     alertShownRef.current = false;
     battleCompleteHandledRef.current = false;
+    victoryRef.current = null;
     
     // ゲームステートが更新されたときに戦闘状態を同期
     if (gameState.inBattle) {
@@ -46,13 +49,33 @@ export default function BattleScreen() {
     }
   }, [gameState.inBattle]);
 
-  // 戦闘終了時の処理
+  // 戦闘終了時の処理を一本化
   useEffect(() => {
     if (!battleInProgress) {
-      updateGameState({
-        inBattle: false,
-        _nonce: Date.now()
-      });
+      const victory = victoryRef.current;
+
+      if (victory) {
+        // 勝利時の処理
+        updateGameState({
+          inBattle: false,
+          currentLocation: '',
+          exp: gameState.exp + 600,
+          gold: gameState.gold + 300,
+          _nonce: Date.now(),
+        });
+        Alert.alert('🎉 戦闘勝利！', '600EXP / 300G を獲得', [{ text: 'OK' }], { cancelable: false });
+      } else {
+        // 敗北時の処理
+        updateGameState({
+          inBattle: false,
+          currentLocation: '',
+          hp: Math.max(1, gameState.hp),
+          _nonce: Date.now(),
+        });
+        Alert.alert('💀 戦闘敗北…', 'HP を回復して再挑戦しましょう', [{ text: 'OK' }], { cancelable: false });
+      }
+
+      // マップ画面に遷移
       router.replace('/map');
     }
   }, [battleInProgress]);
@@ -90,62 +113,11 @@ export default function BattleScreen() {
     // 処理済みフラグを設定
     battleCompleteHandledRef.current = true;
     
-    if (victory) {
-      // 勝利時の処理
-      const expGained = 600; // 2体分の経験値に増加
-      const goldGained = 300; // 2体分の金額に増加
-      
-      // 現在のゲームステートを維持しながら必要な値だけを更新
-      const newExp = gameState.exp + expGained;
-      const newGold = gameState.gold + goldGained;
-      
-      // 戦闘状態をリセットし、経験値とゴールドを更新
-      updateGameState({
-        inBattle: false,
-        currentLocation: '',
-        _nonce: Date.now(),
-        exp: newExp,
-        gold: newGold
-      });
-      
-      // 戦闘進行中フラグを解除
-      setBattleInProgress(false);
-      
-      // Alertを表示
-      Alert.alert(
-        '🎉 戦闘勝利！', 
-        `2体の敵を討伐しました！\n\n💫 経験値: +${expGained}\n💰 ゴールド: +${goldGained}`,
-        [
-          { 
-            text: 'マップ選択画面に戻る', 
-            onPress: () => {}  // 空の関数（画面遷移はuseEffectで行う）
-          }
-        ],
-        { cancelable: false }
-      );
-    } else {
-      // 敗北時の処理
-      // 戦闘状態をリセットし、HPを更新
-      updateGameState({
-        inBattle: false,
-        currentLocation: '',
-        _nonce: Date.now(),
-        hp: Math.max(1, gameState.hp) // HPが0になることを防止
-      });
-      
-      // 戦闘進行中フラグを解除
-      setBattleInProgress(false);
-      
-      Alert.alert(
-        '💀 戦闘敗北...', 
-        'HPが危険な状態になりました。\n体力を回復してから再挑戦しましょう。',
-        [{ 
-          text: 'マップ選択画面に戻る', 
-          onPress: () => {}  // 空の関数（画面遷移はuseEffectで行う）
-        }],
-        { cancelable: false }
-      );
-    }
+    // 勝敗結果を保持
+    victoryRef.current = victory;
+    
+    // 戦闘進行中フラグを解除するだけ
+    setBattleInProgress(false);
   };
 
   // 戦闘が終了している場合はフォールバックコンポーネントを表示
