@@ -25,7 +25,7 @@ const initialState: GameState = {
   maxMp: 30,
   exp: 0,
   expToNext: 100,
-  attack: 2000, // 2000にテスト用に変更
+  attack: 20,
   defense: 10,
   gold: 500,
   inBattle: false,
@@ -78,15 +78,4 @@ export function useGameState() {
     updateGameState,
     resetGameState,
   };
-}
-
-function updateGameState(patch: Partial<GameState>) {
-  console.log('[updateGameState] before', state);
-  console.log('[updateGameState] patch', patch);
-
-  setState(prev => {
-    const next = { ...prev, ...patch };
-    console.log('[updateGameState] after', next);
-    return next;
-  });
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, ImageBackground, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, ImageBackground, Alert, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameState } from '@/hooks/useGameState';
 import { Sword, Zap } from 'lucide-react-native';
@@ -50,6 +50,23 @@ export default function QuizBattleScreen({
     generateNewQuiz();
     // マウント時にリセット
     alertShownRef.current = false;
+    
+    // デバッグ用：初期ステータスの確認
+    console.log('======== QuizBattleScreen マウント時のステータス ========');
+    console.log('プラットフォーム:', Platform.OS);
+    console.log('プレイヤーレベル:', gameState.level);
+    console.log('プレイヤーHP:', gameState.hp);
+    console.log('プレイヤー攻撃力:', gameState.attack);
+    console.log('敵の情報:', currentEnemy);
+    console.log('====================================================');
+    
+    // アラートでも表示（確実に確認するため）
+    Alert.alert(
+      'デバッグ情報',
+      `プラットフォーム: ${Platform.OS}\n攻撃力: ${gameState.attack}`
+    );
+    // デバッグ用のログ追加（不正解時）ここまで
+
   }, []);
 
   useEffect(() => {
@@ -148,6 +165,24 @@ export default function QuizBattleScreen({
         const attackBonus = gameState.attack || 0; // プレイヤーの攻撃力
         const damage = baseDamage + Math.floor(attackBonus / 5); // 合計ダメージ（攻撃力の1/5を加算）
         
+        // デバッグ用のログ追加
+        console.log('======== ダメージ計算デバッグ ========');
+        console.log('プラットフォーム:', Platform.OS);
+        console.log('基本ダメージ:', baseDamage);
+        console.log('プレイヤー攻撃力:', attackBonus);
+        console.log('攻撃力ボーナス:', Math.floor(attackBonus / 5));
+        console.log('合計ダメージ:', damage);
+        console.log('敵の現在HP:', currentEnemy.hp);
+        console.log('敵の残りHP:', Math.max(0, currentEnemy.hp - damage));
+        console.log('===================================');
+        
+        // アラートでも表示（確実に確認するため）
+        Alert.alert(
+          'ダメージ計算',
+          `プラットフォーム: ${Platform.OS}\n基本: ${baseDamage}\n攻撃力: ${attackBonus}\nボーナス: ${Math.floor(attackBonus / 5)}\n合計: ${damage}`
+        );
+        // デバッグ用のログ追加（不正解時）ここまで
+
         setDamageValue(damage); // ダメージ値を状態に保存
         const newEnemyHp = Math.max(0, currentEnemy.hp - damage);
         
@@ -203,6 +238,16 @@ export default function QuizBattleScreen({
       setTimeout(() => {
         const damage = Math.floor(Math.random() * 15) + 10;
         const newHp = Math.max(1, gameState.hp - damage);
+        
+        // デバッグ用のログ追加（不正解時）ここから
+        console.log('======== プレイヤーダメージ計算デバッグ ========');
+        console.log('プラットフォーム:', Platform.OS);
+        console.log('敵からの基本ダメージ:', damage);
+        console.log('プレイヤー現在HP:', gameState.hp);
+        console.log('プレイヤー残りHP:', newHp);
+        console.log('=========================================');
+        // デバッグ用のログ追加（不正解時）ここまで
+
         updateGameState({ hp: newHp });
         
         if (newHp <= 1) {
