@@ -163,7 +163,7 @@ export default function QuizBattleScreen({
         // プレイヤーの攻撃力を考慮したダメージ計算
         const baseDamage = Math.floor(Math.random() * 10) + 10; // 基本ダメージ 10-19
         const attackBonus = gameState.attack || 0; // プレイヤーの攻撃力
-        const damage = baseDamage + Math.floor(attackBonus / 5); // 合計ダメージ（攻撃力の1/5を加算）
+        const damage = baseDamage + Math.floor(attackBonus *3); // 合計ダメージ（攻撃力の3倍を加算）
         
         // デバッグ用のログ追加
         console.log('======== ダメージ計算デバッグ ========');
