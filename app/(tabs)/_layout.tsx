@@ -1,7 +1,10 @@
 import { Tabs } from 'expo-router';
-import { Sword, User, Package, Map } from 'lucide-react-native';
+import { User, Package, Map, Sword } from 'lucide-react-native';
+import { useGameState } from '@/hooks/useGameState';
 
 export default function TabLayout() {
+  const { gameState } = useGameState();
+
   return (
     <Tabs
       initialRouteName="map"

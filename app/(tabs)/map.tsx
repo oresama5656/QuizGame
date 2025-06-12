@@ -12,13 +12,10 @@ export default function MapScreen() {
   // 画面がフォーカスされるたびに実行
   useFocusEffect(
     useCallback(() => {
-      console.log('マップ画面フォーカス: battleInProgressをfalseに設定');
+      console.log('マップ画面フォーカス');
       
-      // 戦闘状態をリセット（保険として）
-      updateGameState({
-        battleInProgress: false,
-        _nonce: Date.now()
-      });
+      // バトル画面から戻ってきた場合のみ、battleInProgressをリセット
+      // この処理は不要になったので削除
       
       return () => {
         console.log('マップ画面フォーカス解除');
@@ -124,10 +121,11 @@ export default function MapScreen() {
       // 更新後の状態を確認
       console.log('battleInProgress設定後:', true);
       
-      // 少し遅延させてから画面遷移
-      setTimeout(() => { // ここで遅延させる。あとで消してみる
-        router.push(`/battle?_=${Date.now()}`);  // 毎回違うURLでBattleScreenをマウント
-      }, 100); // ここで遅延させる。あとで消してみる
+      // ルートディレクトリのバトル画面に遷移
+      router.replace({
+        pathname: '/(tabs)/battle',
+        params: { _: Date.now() }  // 毎回違うURLでBattleScreenをマウント
+      });
     } else if (location.type === 'safe') {
       Alert.alert(
         '安全地帯', 

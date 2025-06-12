@@ -215,6 +215,7 @@ export default function QuizBattleScreen({
               setBattleEnded(true);
               if (!alertShownRef.current) {
                 alertShownRef.current = true;
+                // 戦闘勝利を即座に親コンポーネントに通知
                 onBattleComplete(true);
               }
             } else {
@@ -226,7 +227,7 @@ export default function QuizBattleScreen({
               // 次のクイズを生成
               generateNewQuiz();
             }
-          }, 1500);
+          }, 800); // 遅延時間を短縮
         } else {
           // 敵はまだ生きている
           setTimeout(() => {

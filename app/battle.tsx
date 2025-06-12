@@ -133,4 +133,11 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
   },
+  loadingText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 20,
+  },
 }); 
