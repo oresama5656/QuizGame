@@ -1,10 +1,7 @@
 import { Tabs } from 'expo-router';
-import { User, Package, Map, Sword } from 'lucide-react-native';
-import { useGameState } from '@/hooks/useGameState';
+import { User, Package, Map } from 'lucide-react-native';
 
 export default function TabLayout() {
-  const { gameState } = useGameState();
-
   return (
     <Tabs
       initialRouteName="map"
@@ -24,15 +21,6 @@ export default function TabLayout() {
           title: 'マップ',
           tabBarIcon: ({ size, color }) => (
             <Map size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="battle"
-        options={{
-          title: '戦闘',
-          tabBarIcon: ({ size, color }) => (
-            <Sword size={size} color={color} />
           ),
         }}
       />

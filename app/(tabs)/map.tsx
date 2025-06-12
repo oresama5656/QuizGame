@@ -123,7 +123,7 @@ export default function MapScreen() {
       
       // ルートディレクトリのバトル画面に遷移
       router.replace({
-        pathname: '/(tabs)/battle',
+        pathname: '/battle',
         params: { _: Date.now() }  // 毎回違うURLでBattleScreenをマウント
       });
     } else if (location.type === 'safe') {
