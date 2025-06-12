@@ -26,8 +26,8 @@ export default function MapScreen() {
   const locations = [
     {
       id: 'village',
-      name: '平和な村',
-      description: '冒険の始まりの地。優しい村人たちが住んでいる。',
+      name: '薬学アカデミー',
+      description: '薬剤師のための学習拠点。ここで休息して体力を回復できます。',
       image: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=300',
       level: 1,
       unlocked: true,
@@ -38,63 +38,67 @@ export default function MapScreen() {
     },
     {
       id: 'forest',
-      name: '深い森',
-      description: '古い樹木が立ち並ぶ神秘的な森。スライムやゴブリンが出現する。',
+      name: '糖尿病治療薬の森',
+      description: '糖尿病治療薬に関する知識を試す初級エリア。DPP-4阻害薬やSGLT2阻害薬などの問題が出題されます。',
       image: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=300',
       level: 1,
       unlocked: true,
       completed: false,
       type: 'dungeon',
-      enemies: ['スライム', 'ゴブリン', '森の狼'],
-      rewards: ['鉄の剣', '100G', '経験値200'],
+      enemies: ['メトホルミン', 'グリメピリド', 'シタグリプチン'],
+      rewards: ['糖尿病治療薬の知識', '100G', '経験値200'],
     },
     {
       id: 'mountain',
-      name: '霧の山',
-      description: '雲に覆われた険しい山道。強力なモンスターが潜んでいる。',
+      name: '糖尿病治療薬の高地',
+      description: '糖尿病治療薬に関する応用問題が出題される中級エリア。作用機序や副作用について詳しく学べます。',
       image: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=300',
       level: 2,
-      unlocked: gameState.level >= 2,
+      // unlocked: gameState.level >= 2,
+      unlocked: true, // デバッグ用
       completed: false,
       type: 'dungeon',
-      enemies: ['山賊', '石のゴーレム', '氷の精霊'],
-      rewards: ['鋼の剣', '300G', '経験値500'],
+      enemies: ['インスリン製剤', 'SGLT2阻害薬', 'GLP-1受容体作動薬'],
+      rewards: ['糖尿病治療の応用知識', '300G', '経験値500'],
     },
     {
       id: 'desert',
-      name: '灼熱の砂漠',
-      description: '果てしなく続く砂の海。古代の遺跡が眠っている。',
+      name: '抗血小板薬の砂漠',
+      description: '抗血小板薬に関する知識を試す中級エリア。アスピリンやクロピドグレルなどの問題が出題されます。',
       image: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=300',
       level: 8,
-      unlocked: gameState.level >= 8,
+      // unlocked: gameState.level >= 8,
+      unlocked: true, // デバッグ用
       completed: false,
       type: 'dungeon',
-      enemies: ['サンドワーム', '砂漠の盗賊', 'ミイラ'],
-      rewards: ['魔法の杖', '500G', '経験値800'],
+      enemies: ['アスピリン', 'クロピドグレル', 'プラスグレル'],
+      rewards: ['抗血小板薬の知識', '500G', '経験値800'],
     },
     {
       id: 'castle',
-      name: '魔王の城',
-      description: '邪悪な力が渦巻く恐ろしい城。最終決戦の舞台。',
+      name: '抗血小板薬の要塞',
+      description: '抗血小板薬に関する高度な問題が出題される上級エリア。作用機序や相互作用について詳しく学べます。',
       image: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=300',
       level: 15,
-      unlocked: gameState.level >= 15,
+      // unlocked: gameState.level >= 15,
+      unlocked: true, // デバッグ用
       completed: false,
       type: 'boss',
-      enemies: ['魔王', '闇の騎士', 'ドラゴン'],
-      rewards: ['伝説の剣', '2000G', '経験値2000'],
+      enemies: ['チクロピジン', 'シロスタゾール', '抗血小板薬マスター'],
+      rewards: ['抗血小板薬の応用知識', '2000G', '経験値2000'],
     },
     {
       id: 'town',
-      name: '商業都市',
-      description: '様々な商人が集まる賑やかな街。アイテムの売買ができる。',
+      name: '薬学図書館',
+      description: '様々な薬学書が集まる知識の宝庫。ここで新しい薬剤の情報を得ることができます。',
       image: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=300',
       level: 3,
-      unlocked: gameState.level >= 3,
+      // unlocked: gameState.level >= 3,
+      unlocked: true, // デバッグ用
       completed: false,
       type: 'safe',
       enemies: [],
-      rewards: ['買い物', '宿屋', '情報収集'],
+      rewards: ['薬学知識', '参考書', '情報収集'],
     },
   ];
 
@@ -172,7 +176,7 @@ export default function MapScreen() {
   return (
     <LinearGradient colors={['#1a237e', '#3949ab']} style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>世界地図</Text>
+        <Text style={styles.title}>薬学クイズマップ</Text>
         <View style={styles.playerInfo}>
           <Text style={styles.playerLevel}>Lv.{gameState.level}</Text>
         </View>
@@ -248,7 +252,17 @@ export default function MapScreen() {
 
           <View style={styles.actionsContainer}>
             {selectedLoc.type === 'safe' ? (
-              <TouchableOpacity style={styles.visitButton}>
+              <TouchableOpacity 
+                style={styles.visitButton}
+                onPress={() => {
+                  // 安全地帯でも現在地を設定する
+                  updateGameState({
+                    currentLocation: selectedLoc.id,
+                    _nonce: Date.now()
+                  });
+                  handleExplore(selectedLoc);
+                }}
+              >
                 <Text style={styles.visitButtonText}>訪問する</Text>
               </TouchableOpacity>
             ) : (
@@ -258,7 +272,8 @@ export default function MapScreen() {
                   gameState.level < selectedLoc.level && styles.disabledButton,
                 ]}
                 onPress={() => handleExplore(selectedLoc)}
-                disabled={gameState.level < selectedLoc.level}
+                // disabled={gameState.level < selectedLoc.level} // デバッグ用
+                disabled={false} // デバッグ用
               >
                 <Text style={styles.exploreButtonText}>
                   {selectedLoc.type === 'boss' ? '挑戦する' : '探索する'}
