@@ -174,6 +174,7 @@ export default function QuizBattleScreen({
         console.log('合計ダメージ:', damage);
         console.log('敵の現在HP:', currentEnemy.hp);
         console.log('敵の残りHP:', Math.max(0, currentEnemy.hp - damage));
+        console.log('battleInProgress:', !battleEnded);
         console.log('===================================');
         
         // アラートでも表示（確実に確認するため）

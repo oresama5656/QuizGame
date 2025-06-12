@@ -7,7 +7,7 @@ import QuizBattleScreen from '@/app/components/QuizBattleScreen';
 import { QUIZ_DATA } from '@/app/data/quizData';
 import { getRandomEnemyForLocation, Enemy } from '@/app/data/enemyData';
 
-// 戦闘背景画像のリスト（差し替え可能）
+// battleスト（差し替え可能）
 const BATTLE_BACKGROUNDS = [
   'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=800', // 森
   'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=800', // 山

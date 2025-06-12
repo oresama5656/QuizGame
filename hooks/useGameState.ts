@@ -12,7 +12,7 @@ export interface GameState {
   attack: number;
   defense: number;
   gold: number;
-  inBattle: boolean;
+  battleInProgress: boolean;
   currentLocation: string;
   _nonce?: number;  // 再レンダリングを強制するための一時的な値
 }
@@ -28,7 +28,7 @@ const initialState: GameState = {
   attack: 20,
   defense: 10,
   gold: 500,
-  inBattle: false,
+  battleInProgress: false,
   currentLocation: 'village',
 };
 

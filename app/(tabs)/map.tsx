@@ -12,11 +12,17 @@ export default function MapScreen() {
   // 画面がフォーカスされるたびに実行
   useFocusEffect(
     useCallback(() => {
+      console.log('マップ画面フォーカス: battleInProgressをfalseに設定');
+      
       // 戦闘状態をリセット（保険として）
       updateGameState({
-        inBattle: false,
+        battleInProgress: false,
         _nonce: Date.now()
       });
+      
+      return () => {
+        console.log('マップ画面フォーカス解除');
+      };
     }, [])
   );
 
@@ -104,14 +110,24 @@ export default function MapScreen() {
 
   const handleExplore = (location: any) => {
     if (location.type === 'dungeon' || location.type === 'boss') {
+      // まず確実にbattleInProgressをtrueに設定
+      console.log('探索開始: battleInProgressをtrueに設定');
+      
       updateGameState({ 
-        inBattle: true,
+        battleInProgress: true,
         currentLocation: location.id,
         hp: gameState.maxHp,
         mp: gameState.maxMp,
         _nonce: Date.now()  // 常に新しいオブジェクト参照を渡す
       });
-      router.push(`/battle?_=${Date.now()}`);  // 毎回違うURLでBattleScreenをマウント
+      
+      // 更新後の状態を確認
+      console.log('battleInProgress設定後:', true);
+      
+      // 少し遅延させてから画面遷移
+      setTimeout(() => { // ここで遅延させる。あとで消してみる
+        router.push(`/battle?_=${Date.now()}`);  // 毎回違うURLでBattleScreenをマウント
+      }, 100); // ここで遅延させる。あとで消してみる
     } else if (location.type === 'safe') {
       Alert.alert(
         '安全地帯', 
